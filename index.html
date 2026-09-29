@@ -28,7 +28,7 @@
 <meta name="apple-mobile-web-app-title" content="A330精准题库">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
-<link rel="manifest" href="./manifest.json">
+<link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkEzMzDnsr7lh4bpopjlupMiLAogICJzaG9ydF9uYW1lIjogIkEzMzDnsr7lh4YiLAogICJzdGFydF91cmwiOiAiLi9pbmRleC5odG1sIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMGQxMTE3IiwKICAidGhlbWVfY29sb3IiOiAiIzBkMTExNyIKfQ==">
 <title>A330 精准题库 - iPhone键盘优化版</title>
 <style>
 :root{--bg:#0d1117;--sf:#161b22;--sf2:#21262d;--bd:#30363d;--ac:#58a6ff;--gr:#3fb950;--rd:#f85149;--tx:#e6edf3;--tx2:#8b949e;}
@@ -68,8 +68,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC",sa
 .btnstart{width:100%;padding:12px;background:linear-gradient(135deg,#1f6feb,#58a6ff);border:none;border-radius:11px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;margin-top:10px;min-height:46px;}
 .wrong-quick{display:flex;align-items:center;gap:8px;margin-top:8px;background:rgba(63,185,80,.08);border:1px dashed rgba(63,185,80,.22);border-radius:10px;padding:7px 10px;font-size:11px;color:var(--tx2);}
 .btn-mini{padding:5px 10px;border-radius:20px;border:1px solid var(--bd);background:var(--sf2);font-size:11px;font-weight:600;min-height:30px;cursor:pointer;}
-.search-fixed{flex-shrink:0;background:var(--sf);border-top:1.5px solid var(--bd);border-radius:16px 16px 0 0;padding:8px 12px calc(8px + env(safe-area-inset-bottom));display:flex;flex-direction:column;max-height:68vh;max-height:68dvh;box-shadow:0 -12px 30px rgba(0,0,0,.45);position:relative;z-index:50;transition:max-height .25s ease;}
-.search-fixed.focused{max-height:85vh;max-height:85dvh;}
+.search-fixed{flex-shrink:0;background:var(--sf);border-top:1.5px solid var(--bd);border-radius:16px 16px 0 0;padding:8px 12px calc(32px + env(safe-area-inset-bottom));display:flex;flex-direction:column;max-height:68vh;max-height:68dvh;box-shadow:0 -12px 30px rgba(0,0,0,.45);position:relative;z-index:50;transition:all .25s ease;margin-bottom:0;}
+.search-fixed.focused{max-height:85vh;max-height:85dvh;padding-bottom:calc(92px + env(safe-area-inset-bottom));transform:translateY(-8px);}
+.search-fixed.focused .search-input-bar{transform:translateY(-22px);box-shadow:0 12px 32px rgba(0,0,0,.45);border-color:var(--ac);}
+.search-fixed.focused .search-results{max-height:38vh;max-height:38dvh;margin-bottom:12px;}
 .search-results{overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;flex-direction:column;gap:6px;min-height:0;max-height:42vh;max-height:42dvh;margin-bottom:8px;padding-right:2px;}
 .search-results.on{display:flex;}
 .sr-item{background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;font-size:13px;cursor:pointer;}
