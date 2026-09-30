@@ -29,7 +29,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
 <link rel="manifest" href="./manifest.json">
-<title>A330 精准题库 - 搜索置顶版</title>
+<title>A330 精准题库 - 固定搜索+四栏对齐版</title>
 <style>
 :root{--bg:#0d1117;--sf:#161b22;--sf2:#21262d;--bd:#30363d;--ac:#58a6ff;--gr:#3fb950;--rd:#f85149;--yn:#e3b341;--tx:#e6edf3;--tx2:#8b949e;}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -39,11 +39,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC",sa
 .hdr-ico{width:32px;height:32px;background:linear-gradient(135deg,#1f6feb,#58a6ff);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
 .hdr h1{font-size:15px;font-weight:700;}
 .hdr p{font-size:11px;color:var(--tx2);margin-top:1px;}
-.scr{display:none;flex:1;flex-direction:column;min-height:0;max-width:720px;width:100%;margin:0 auto;overflow:hidden;}
+.scr{display:none;flex:1;flex-direction:column;min-height:0;max-width:720px;width:100%;margin:0 auto;overflow:hidden;position:relative;}
 .scr.on{display:flex;}
-#s-home.on{display:flex;flex-direction:column;overflow:hidden;}
-/* 默认 */
-.top-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 16px 16px;min-height:0;transition:all .25s ease;}
+#s-home.on{display:flex;flex-direction:column;overflow:hidden;height:100%;height:100dvh;}
+/* 顶部可滚动区 - 留出底部固定搜索的空间 */
+.top-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 16px 110px;min-height:0;}
 .slbl{font-size:11px;font-weight:700;color:var(--tx2);letter-spacing:.8px;margin:14px 0 8px;}
 .slbl:first-child{margin-top:0;}
 .modes-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
@@ -58,42 +58,50 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC",sa
 .chitem{background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:9px 12px;display:flex;justify-content:space-between;align-items:center;font-size:13px;}
 .chitem.on{border-color:var(--ac);background:rgba(88,166,255,.12);}
 .chcnt{font-size:11px;color:var(--tx2);background:var(--sf);padding:2px 8px;border-radius:20px;border:1px solid var(--bd);}
-.split-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:flex-start;}
-.csel-compact{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:10px 12px;flex:1 1 48%;min-width:160px;max-width:50%;}
-@media(max-width:500px){.csel-compact{max-width:100%;flex:1 1 100%;}.split-row .side-col{max-width:100%;flex:1 1 100%;}}
-.side-col{flex:1 1 48%;min-width:160px;display:flex;flex-direction:column;gap:8px;}
-.csel-compact label{font-size:11px;color:var(--tx2);font-weight:600;margin-bottom:6px;display:block;}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;}
-.chip{padding:5px 11px;border-radius:20px;border:1.5px solid var(--bd);background:var(--sf2);font-size:12px;font-weight:500;min-height:30px;display:flex;align-items:center;cursor:pointer;}
+/* 四栏对齐 - 选题范围 + 错题栏 左右并排，等高 */
+.four-col-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;align-items:stretch;}
+.csel-compact{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:12px;display:flex;flex-direction:column;}
+.csel-compact label{font-size:11px;color:var(--tx2);font-weight:700;margin-bottom:8px;display:block;letter-spacing:.3px;}
+.chips{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;}
+.chips.four{grid-template-columns:repeat(4,1fr);}
+.chip{padding:6px 8px;border-radius:20px;border:1.5px solid var(--bd);background:var(--sf2);font-size:12px;font-weight:500;min-height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;text-align:center;white-space:nowrap;}
 .chip.on{border-color:var(--ac);background:rgba(88,166,255,.14);color:var(--ac);}
-.crow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.crow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px;}
 .cinput{background:var(--bg);border:1.5px solid var(--bd);border-radius:9px;color:var(--tx);padding:7px 10px;font-size:16px;width:68px;outline:none;}
 .cmx{font-size:11px;color:var(--tx2);}
+.progress-mini{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:11px;color:var(--tx2);}
+.progress-bar-mini{flex:1;height:4px;background:var(--sf2);border-radius:3px;overflow:hidden;}
+.progress-fill-mini{height:100%;background:var(--ac);border-radius:3px;}
+/* 右侧错题栏 - 与左侧等高对齐 */
+.wrong-card{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:12px;display:flex;flex-direction:column;justify-content:space-between;}
+.wrong-card-hd{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.wrong-card-ico{width:28px;height:28px;background:rgba(63,185,80,.12);border:1px solid rgba(63,185,80,.22);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.wrong-card h4{font-size:13px;font-weight:700;}
+.wrong-card p{font-size:11px;color:var(--tx2);line-height:1.4;margin-bottom:10px;}
+.wrong-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;}
+.w-stat{background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:8px;text-align:center;}
+.w-stat b{font-size:16px;display:block;}
+.w-stat span{font-size:10px;color:var(--tx2);}
 .btnstart{width:100%;padding:12px;background:linear-gradient(135deg,#1f6feb,#58a6ff);border:none;border-radius:11px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;min-height:46px;}
-.wrong-quick{display:flex;align-items:center;gap:8px;background:rgba(63,185,80,.08);border:1px dashed rgba(63,185,80,.22);border-radius:10px;padding:7px 10px;font-size:11px;color:var(--tx2);}
-.btn-mini{padding:5px 10px;border-radius:20px;border:1px solid var(--bd);background:var(--sf2);font-size:11px;font-weight:600;min-height:30px;cursor:pointer;}
-/* 搜索区 - 默认 */
-.search-fixed{flex-shrink:0;background:var(--sf);border-top:1.5px solid var(--bd);border-radius:16px 16px 0 0;padding:8px 12px calc(16px + env(safe-area-inset-bottom));display:flex;flex-direction:column;max-height:60vh;max-height:60dvh;box-shadow:0 -12px 30px rgba(0,0,0,.45);position:relative;z-index:50;transition:all .3s ease;}
-.search-results{overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;flex-direction:column;gap:6px;min-height:0;max-height:48vh;max-height:48dvh;margin-bottom:8px;padding-right:2px;flex:1;}
-.search-results.on{display:flex;}
-/* 搜索聚焦时 - 全屏搜索模式：上面练习区收起，搜索区占满，输入框在键盘气泡上面 */
-#s-home.searching .top-scroll{display:none;}
-#s-home.searching{flex:1;overflow:hidden;}
-#s-home.searching .search-fixed{flex:1;max-height:100vh;max-height:100dvh;max-height:-webkit-fill-available;border-radius:0;padding:8px 12px calc(88px + env(safe-area-inset-bottom));background:var(--bg);border-top:none;box-shadow:none;transform:translateY(0);}
-#s-home.searching .search-results{max-height:none;flex:1;display:flex;margin-bottom:12px;}
-#s-home.searching .search-input-bar{transform:translateY(-18px);box-shadow:0 12px 32px rgba(0,0,0,.45);border-color:var(--ac);background:var(--sf);}
-.search-fixed.focused{max-height:86vh;max-height:86dvh;padding-bottom:calc(88px + env(safe-area-inset-bottom));}
-.search-fixed.focused .search-input-bar{transform:translateY(-18px);box-shadow:0 12px 32px rgba(0,0,0,.45);border-color:var(--ac);}
-.sr-item{background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;font-size:13px;cursor:pointer;}
-.sr-item:active{border-color:var(--ac);transform:scale(.99);}
-.sr-meta{font-size:10px;color:var(--tx2);margin-top:2px;}
-.sr-empty{font-size:12px;color:var(--tx2);text-align:center;padding:18px 8px;}
-.search-input-bar{display:flex;gap:8px;align-items:center;background:var(--bg);border:1.8px solid var(--bd);border-radius:14px;padding:5px 6px 5px 14px;transition:all .25s ease;flex-shrink:0;min-height:50px;}
+.btn-mini{padding:6px 12px;border-radius:20px;border:1px solid var(--bd);background:var(--sf2);font-size:11px;font-weight:600;min-height:32px;cursor:pointer;}
+@media(max-width:520px){.four-col-row{grid-template-columns:1fr;}.chips.four{grid-template-columns:repeat(4,1fr);}}
+/* 固定在底部的搜索 - 不再跑来跑去，始终在气泡上面 */
+.search-fixed{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:720px;background:var(--sf);border-top:1.5px solid var(--bd);border-radius:16px 16px 0 0;padding:8px 12px calc(12px + env(safe-area-inset-bottom));display:flex;flex-direction:column;z-index:50;box-shadow:0 -12px 30px rgba(0,0,0,.45);max-height:72vh;max-height:72dvh;transition:max-height .25s ease;}
+.search-fixed .search-results{overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;flex-direction:column;gap:6px;min-height:0;max-height:48vh;max-height:48dvh;margin-bottom:8px;padding-right:2px;flex:1;}
+.search-fixed .search-results.on{display:flex;}
+.search-fixed.searching{max-height:85vh;max-height:85dvh;padding-bottom:calc(96px + env(safe-area-inset-bottom));}
+.search-fixed.searching .search-results{max-height:62vh;max-height:62dvh;}
+/* 输入框 - 固定在底部，不再transform乱跳 */
+.search-input-bar{display:flex;gap:8px;align-items:center;background:var(--bg);border:1.8px solid var(--bd);border-radius:14px;padding:5px 6px 5px 14px;flex-shrink:0;min-height:50px;transition:border-color .15s, box-shadow .15s;}
 .search-input-bar:focus-within{border-color:var(--ac);box-shadow:0 0 0 3px rgba(88,166,255,.18);}
 .sinput-big{flex:1;background:transparent;border:none;color:var(--tx);font-size:17px;outline:none;min-height:40px;padding:6px 0;}
 .sinput-big::placeholder{color:var(--tx2);font-size:15px;}
 .sbtn-icon{width:36px;height:36px;border-radius:9px;border:none;background:var(--sf2);color:var(--tx2);font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;}
 .sbtn-icon.primary{background:linear-gradient(135deg,#1f6feb,#58a6ff);color:#fff;}
+.sr-item{background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;font-size:13px;cursor:pointer;}
+.sr-item:active{border-color:var(--ac);transform:scale(.99);}
+.sr-meta{font-size:10px;color:var(--tx2);margin-top:2px;}
+.sr-empty{font-size:12px;color:var(--tx2);text-align:center;padding:18px 8px;}
 .qprog{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:10px 14px;margin:10px 12px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
 .pbar{flex:1;height:4px;background:var(--sf2);border-radius:3px;overflow:hidden;}
 .pfill{height:100%;background:var(--ac);border-radius:3px;}
@@ -122,7 +130,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC",sa
 
 <div id="s-home" class="scr on">
   <div class="top-scroll" id="topScroll">
-    <div class="slbl">练习模式 · 去重5389题 · 保留FCOM出处 · 搜索全屏版</div>
+    <div class="slbl">练习模式 · 去重5389题 · 保留FCOM出处 · 固定搜索版</div>
     <div class="modes-row">
       <div class="mcard on" id="m-rand" onclick="selMode('rand')"><div class="mi">🎲</div><h3>随机连续</h3><p>不重复刷完</p><div class="cnt" id="rand-cnt-badge"></div></div>
       <div class="mcard" id="m-ch" onclick="selMode('ch')"><div class="mi">📚</div><h3>分章节</h3><p>专项</p><div class="cnt" id="ch-cnt-badge"></div></div>
@@ -130,15 +138,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC",sa
     </div>
     <div class="chlist" id="chlist"></div>
 
-    <div class="split-row">
-      <div class="csel-compact half">
-        <label>选题范围 · 已压半宽</label>
-        <div class="chips" id="rmChips">
+    <div class="four-col-row">
+      <div class="csel-compact">
+        <label>选题范围 · 四栏对齐</label>
+        <div class="chips">
           <div class="chip on" data-rm="random" onclick="selRangeModeType(this,'random')">🎲 随机</div>
           <div class="chip" data-rm="range" onclick="selRangeModeType(this,'range')">📌 固定</div>
         </div>
         <div id="random-count-block">
-          <div class="chips">
+          <div class="chips four">
             <div class="chip on" onclick="selChip(this,10)">10题</div>
             <div class="chip" onclick="selChip(this,20)">20题</div>
             <div class="chip" onclick="selChip(this,50)">50题</div>
@@ -149,26 +157,31 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC",sa
             <span class="cmx" id="cmx">/ 5389</span>
             <button class="btn-mini" onclick="resetRandProgress()">重置</button>
           </div>
-          <div style="display:flex;align-items:center;gap:8px;margin-top:6px;font-size:11px;color:var(--tx2);"><span id="rand-progress-text" style="flex-shrink:0;">加载中</span><div style="flex:1;height:4px;background:var(--sf2);border-radius:3px;overflow:hidden;"><div id="rand-progress-fill" style="height:100%;background:var(--ac);width:0%;"></div></div></div>
+          <div class="progress-mini"><span id="rand-progress-text" style="flex-shrink:0;">加载中</span><div class="progress-bar-mini"><div class="progress-fill-mini" id="rand-progress-fill" style="width:0%"></div></div></div>
         </div>
         <div id="range-block" style="display:none;">
           <div class="crow"><span style="font-size:11px;color:var(--tx2);">从</span><input type="number" class="cinput" id="range-start" value="1" min="1" inputmode="numeric" oninput="onRangeInput()" style="width:64px;"><span style="font-size:11px;color:var(--tx2);">到</span><input type="number" class="cinput" id="range-end" value="100" min="1" inputmode="numeric" oninput="onRangeInput()" style="width:64px;"><span style="font-size:11px;color:var(--tx2);">题</span></div>
-          <div class="cmx" id="range-hint" style="margin-top:4px;">按原始顺序</div>
+          <div class="cmx" id="range-hint" style="margin-top:6px;">按原始顺序</div>
         </div>
       </div>
 
-      <div class="side-col">
-        <div class="wrong-quick">
-          <span>📕 已存 <b id="wrong-quick-cnt">0</b> 题</span>
-          <div style="flex:1"></div>
-          <button class="btn-mini" onclick="openWrongScreen()">管理</button>
-          <button class="btn-mini" style="background:rgba(63,185,80,.14);border-color:rgba(63,185,80,.28);color:var(--gr);" onclick="exportWrongQFile()">📥 备份</button>
+      <div class="wrong-card">
+        <div>
+          <div class="wrong-card-hd"><div class="wrong-card-ico">📕</div><h4>错题栏 · 右侧对齐</h4></div>
+          <p>答错自动进，蒙对可手动★加入。右侧不再空白，四栏等高对齐。</p>
+          <div class="wrong-stats">
+            <div class="w-stat"><b id="wrong-quick-cnt" style="color:var(--rd);">0</b><span>已存错题</span></div>
+            <div class="w-stat"><b id="rand-quick-remain" style="color:var(--ac);">0</b><span>剩余未刷</span></div>
+          </div>
         </div>
-        <button class="btnstart" id="btnstart" onclick="startQuiz()">开始练习 →</button>
-        <div style="font-size:10px;color:var(--tx2);text-align:center;">点搜索自动全屏 · 上面全是结果</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="btn-mini" style="flex:1;" onclick="openWrongScreen()">管理</button>
+          <button class="btn-mini" style="flex:1;background:rgba(63,185,80,.14);border-color:rgba(63,185,80,.28);color:var(--gr);" onclick="exportWrongQFile()">📥 备份</button>
+          <button class="btnstart" id="btnstart" onclick="startQuiz()" style="margin-top:2px;">开始练习 →</button>
+        </div>
       </div>
     </div>
-    <div style="height:12px;"></div>
+    <div style="height:20px;"></div>
   </div>
 
   <div class="search-fixed" id="searchFixed">
@@ -178,7 +191,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC",sa
       <button class="sbtn-icon" id="clearSearchBtn" onclick="clearSearch()" style="display:none;">✕</button>
       <button class="sbtn-icon primary" onclick="doSearch()">🔍</button>
     </div>
-    <div style="font-size:10px;color:var(--tx2);text-align:center;margin-top:6px;" id="search-hint">点搜索自动全屏 · 输入框在键盘和网址气泡上面 · 上面全是结果 · 已去重5389题</div>
+    <div style="font-size:10px;color:var(--tx2);text-align:center;margin-top:6px;" id="search-hint">固定在底部 · 在键盘和网址气泡上面 · 不再乱跑 · 已去重5389题</div>
   </div>
 </div>
 
@@ -238,8 +251,7 @@ try{
   Q=JSON.parse(raw);
 }catch(e){
   console.error('数据解析失败',e);
-  var msg='数据加载失败: '+e.message+'。请重新下载文件，或清理浏览器缓存后刷新。';
-  try{alert(msg);}catch(_){ }
+  try{alert('数据加载失败: '+e.message);}catch(_){ }
   Q=[];
 }
 var mode='rand',selCh=null,qCnt=10,rangeSel='random',quiz=[],idx=0,okCnt=0,selOpts=[],answered=false,quizStates=[];
@@ -265,6 +277,7 @@ function updateWrongCounts(){
   var qc=document.getElementById('wrong-quick-cnt');if(qc)qc.textContent=n;
   var rc=document.getElementById('rand-cnt-badge');if(rc)rc.textContent=Q.length+'题';
   var cc=document.getElementById('ch-cnt-badge');if(cc)cc.textContent= selCh ? (Q.filter(function(q){return q.chapter===selCh;}).length+'题') : '按章节';
+  var remainEl=document.getElementById('rand-quick-remain');if(remainEl){var st=loadRandState();var key=getPoolKey();var ent=st[key];if(ent){remainEl.textContent=ent.queue.length-ent.ptr;}else{remainEl.textContent=Q.length;}}
 }
 function buildChapterList(){
   var chs={};for(var i=0;i<Q.length;i++){var c=Q[i].chapter;chs[c]=(chs[c]||0)+1;}
@@ -275,28 +288,19 @@ function buildChapterList(){
 function updateHeaderStats(){
   var chs={};for(var i=0;i<Q.length;i++){chs[Q[i].chapter]=1;}
   var chCount=Object.keys(chs).length;
-  document.getElementById('hdrSub').textContent=Q.length+'题 · '+chCount+'章节 · 搜索全屏版 · '+Q.length+'题';
+  document.getElementById('hdrSub').textContent=Q.length+'题 · '+chCount+'章节 · 固定搜索+四栏对齐 · '+Q.length+'题';
   document.getElementById('cmx').textContent='/ '+Q.length;
-  var hint=document.getElementById('search-hint');if(hint)hint.textContent='点搜索自动全屏 · 输入框在键盘和网址气泡上面 · 上面全是结果 · 已去重'+Q.length+'题';
 }
 function init(){loadWrongQ();buildChapterList();updateHeaderStats();updateWrongCounts();updPoolInfo(Q.length);updateRandProgress();}
 var searchTimer=null,lastKw='';
 function onSearchFocus(){
-  var home=document.getElementById('s-home');
-  if(home) home.classList.add('searching');
   var fixed=document.getElementById('searchFixed');
-  if(fixed) fixed.classList.add('focused');
-  setTimeout(function(){
-    var el=document.getElementById('searchFixed');
-    if(el && el.scrollIntoView){ el.scrollIntoView({block:'end',behavior:'smooth'}); }
-  },100);
-  // 确保结果区可见
+  if(fixed){ fixed.classList.add('searching'); }
   var box=document.getElementById('search-results');
   if(box && !box.classList.contains('on')){
-    // 如果之前没搜过，显示提示
     box.classList.add('on');
     box.style.display='flex';
-    box.innerHTML='<div class="sr-empty">输入关键词，上面全屏显示结果<br><span style="font-size:11px;">支持题目和答案模糊</span></div>';
+    box.innerHTML='<div class="sr-empty">输入关键词，上面全屏显示结果<br>输入框固定在键盘和网址气泡上面，不再乱跑</div>';
   }
 }
 function onSearchBlur(){
@@ -304,10 +308,8 @@ function onSearchBlur(){
     var kwEl=document.getElementById('kw-input');
     var kw=kwEl ? kwEl.value.trim() : '';
     if(!kw){
-      var home=document.getElementById('s-home');
-      if(home) home.classList.remove('searching');
       var fixed=document.getElementById('searchFixed');
-      if(fixed) fixed.classList.remove('focused');
+      if(fixed){ fixed.classList.remove('searching'); }
       var box=document.getElementById('search-results');
       if(box){ box.classList.remove('on'); box.style.display='none'; box.innerHTML=''; }
       var clearBtn=document.getElementById('clearSearchBtn');
@@ -324,15 +326,12 @@ function doSearch(){
     var box=document.getElementById('search-results');
     var clearBtn=document.getElementById('clearSearchBtn');
     var fixed=document.getElementById('searchFixed');
-    var home=document.getElementById('s-home');
     if(clearBtn) clearBtn.style.display=kw?'flex':'none';
     if(kw){
-      if(home) home.classList.add('searching');
-      if(fixed) fixed.classList.add('focused');
+      if(fixed) fixed.classList.add('searching');
     }else{
       if(box){ box.classList.remove('on'); box.style.display='none'; box.innerHTML=''; }
-      lastKw='';
-      return;
+      lastKw=''; return;
     }
     if(kw===lastKw && box.classList.contains('on') && box.innerHTML.indexOf('未找到')===-1 && box.innerHTML.indexOf('输入关键词')===-1) return;
     lastKw=kw;
@@ -350,7 +349,7 @@ function doSearch(){
     results.sort(function(a,b){return a.q.q.length-b.q.q.length;});
     if(box){
       box.classList.add('on');box.style.display='flex';
-      if(results.length===0){box.innerHTML='<div class="sr-empty">未找到，试试更短关键词<br><span style="font-size:11px;">支持题目和答案模糊 · 已保留10/20区别</span></div>';return;}
+      if(results.length===0){box.innerHTML='<div class="sr-empty">未找到，试试更短关键词<br>已保留10/20区别 · 已去重'+Q.length+'</div>';return;}
       var html='';
       for(var j=0;j<results.length;j++){
         var q=results[j].q,preview=q.q.length>88?q.q.slice(0,88)+'…':q.q;
@@ -359,7 +358,7 @@ function doSearch(){
         try{if(kw.length>=2){var re=new RegExp('('+kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');display=display.replace(re,'<b style="color:var(--ac);">$1</b>');}}catch(e){}
         html+='<div class="sr-item" onclick="showDetail('+q.id+')"><div style="line-height:1.5;">'+display+tag+'</div><div class="sr-meta">'+escHtml(q.chapter)+' · '+q.type+'</div></div>';
       }
-      html+='<div style="font-size:10px;color:var(--tx2);text-align:center;padding:6px;">共 '+results.length+' 条 · 上面全屏结果 · 输入框在键盘和气泡上面</div>';
+      html+='<div style="font-size:10px;color:var(--tx2);text-align:center;padding:6px;">共 '+results.length+' 条 · 输入框固定在底部气泡上面 · 不再乱跳</div>';
       box.innerHTML=html;box.scrollTop=0;
     }
   },100);
@@ -368,8 +367,7 @@ function clearSearch(){
   var inp=document.getElementById('kw-input');if(inp) inp.value='';lastKw='';
   var box=document.getElementById('search-results');if(box){box.classList.remove('on');box.style.display='none';box.innerHTML='';}
   var clearBtn=document.getElementById('clearSearchBtn');if(clearBtn) clearBtn.style.display='none';
-  var home=document.getElementById('s-home');if(home) home.classList.remove('searching');
-  var fixed=document.getElementById('searchFixed');if(fixed) fixed.classList.remove('focused');
+  var fixed=document.getElementById('searchFixed');if(fixed) fixed.classList.remove('searching');
   if(inp) inp.focus();
 }
 function escHtml(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -555,10 +553,8 @@ function showResult(){
 }
 function showScr(n){var ss=document.querySelectorAll('.scr');for(var i=0;i<ss.length;i++)ss[i].classList.remove('on');document.getElementById('s-'+n).classList.add('on');window.scrollTo(0,0);}
 function goHome(){
-  var home=document.getElementById('s-home');
-  if(home) home.classList.remove('searching');
   var fixed=document.getElementById('searchFixed');
-  if(fixed) fixed.classList.remove('focused');
+  if(fixed) fixed.classList.remove('searching');
   showScr('home');updateRandProgress();updBtn();
 }
 function openWrongScreen(){showScr('wrongbook');document.getElementById('wrong-backup-msg').textContent='';renderWrongQList();updateWrongCounts();}
