@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /
+
+# 告诉所有搜索引擎不要收录这个站
+# 放在和 index.html 同级目录下
