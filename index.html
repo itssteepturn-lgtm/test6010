@@ -88,16 +88,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC",sa
 .search-entry{margin-top:12px;background:var(--sf);border:1.5px solid var(--bd);border-radius:14px;padding:10px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;}
 .search-entry-ico{width:36px;height:36px;background:linear-gradient(135deg,#1f6feb,#58a6ff);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
 .search-entry span{font-size:14px;color:var(--tx2);}
-#s-search.on{display:flex;flex-direction:column;height:100%;height:100dvh;overflow:hidden;background:var(--bg);}
-.search-page-hdr{flex-shrink:0;background:var(--sf);border-bottom:1px solid var(--bd);padding:10px 12px;padding-top:calc(10px + env(safe-area-inset-top));display:flex;align-items:center;gap:10px;}
+#s-search.on{display:flex;flex-direction:column;height:100%;height:100dvh;overflow:hidden;background:var(--bg);isolation:isolate;}
+.search-page-hdr{flex-shrink:0;background:var(--sf);border-bottom:1px solid var(--bd);padding:10px 12px;padding-top:calc(10px + env(safe-area-inset-top));display:flex;align-items:center;gap:10px;z-index:3;}
 .search-page-hdr h3{font-size:14px;font-weight:700;flex:1;}
-.search-page-results{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;min-height:0;padding:0;}
+/* 两层分离：内容层可随意拉，底部输入层自适应不动 */
+.search-page-results{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;display:flex;flex-direction:column;min-height:0;padding:0;position:relative;z-index:1;transform:translateZ(0);}
 .search-results-inner{margin-top:auto;display:flex;flex-direction:column;gap:8px;padding:10px 12px 12px;min-height:min-content;}
-.search-page-bottom{flex-shrink:0;background:var(--sf);border-top:1.5px solid var(--bd);padding:8px 12px calc(12px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px;box-shadow:0 -12px 30px rgba(0,0,0,.4);}
-.ocr-row{display:flex;gap:6px;flex-wrap:wrap;}
+.search-page-bottom{flex-shrink:0;background:var(--sf);border-top:1.5px solid var(--bd);padding:8px 12px calc(10px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:6px;box-shadow:0 -12px 30px rgba(0,0,0,.4);position:relative;z-index:2;transform:translateZ(0);will-change:transform;}
+.bottom-main-row{display:flex;gap:8px;align-items:flex-end;}
+.search-input-wrap{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;}
+.ocr-stop-row{display:none;align-items:center;gap:8px;background:rgba(248,81,73,.10);border:1px solid rgba(248,81,73,.22);border-radius:10px;padding:6px 10px;}
+.ocr-stop-row.on{display:flex;}
+.ocr-side-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;width:88px;flex-shrink:0;}
 .ocr-btn{flex:1;min-width:72px;padding:8px 6px;border-radius:10px;border:1.5px solid var(--bd);background:var(--sf2);font-size:11px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;min-height:48px;justify-content:center;}
 .ocr-btn:active{border-color:var(--ac);background:rgba(88,166,255,.12);transform:scale(.97);}
 .ocr-btn b{font-size:16px;}
+.ocr-btn-side{padding:6px 4px;border-radius:9px;border:1.2px solid var(--bd);background:var(--sf2);font-size:10px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;min-height:42px;justify-content:center;line-height:1.1;}
+.ocr-btn-side:active{border-color:var(--ac);background:rgba(88,166,255,.12);transform:scale(.96);}
+.ocr-btn-side b{font-size:14px;}
 .search-input-bar{display:flex;gap:8px;align-items:center;background:var(--bg);border:1.8px solid var(--bd);border-radius:14px;padding:5px 6px 5px 14px;flex-shrink:0;min-height:50px;transition:border-color .15s, box-shadow .15s;}
 .search-input-bar:focus-within{border-color:var(--ac);box-shadow:0 0 0 3px rgba(88,166,255,.18);}
 .sinput-big{flex:1;background:transparent;border:none;color:var(--tx);font-size:17px;outline:none;min-height:40px;padding:6px 0;}
@@ -244,23 +252,32 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC",sa
     </div>
   </div>
   <div class="search-page-bottom" id="searchBottom">
-    <div class="ocr-row">
-      <button class="ocr-btn" onclick="document.getElementById('camInput').click()"><b>📷</b>拍照</button>
-      <button class="ocr-btn" onclick="document.getElementById('galleryInput').click()"><b>🖼️</b>选图</button>
-      <button class="ocr-btn" onclick="tryPaste()"><b>📋</b>粘贴</button>
-      <button class="ocr-btn" onclick="captureLeft()" style="border-color:rgba(88,166,255,.35);background:rgba(88,166,255,.10);"><b>🖥️</b>识别左侧</button>
+    <div class="ocr-stop-row" id="ocrStopRow">
+      <span style="font-size:12px;">📷 <span id="ocrProgressText">识别中... 0%</span></span>
+      <button class="btn-mini" style="background:var(--rd);color:#fff;border-color:rgba(248,81,73,.3);min-height:32px;" onclick="stopOCR()">■ 停止</button>
+      <span style="font-size:10px;color:var(--tx2);flex:1;text-align:right;">太慢点停止，切文字搜</span>
     </div>
-    <div style="display:flex;gap:6px;align-items:center;margin-top:2px;">
-      <span style="font-size:10px;color:var(--tx2);">左侧比例</span>
-      <input type="range" id="leftRatio" min="30" max="70" value="50" style="flex:1;" oninput="updateLeftRatioLabel()">
-      <span style="font-size:10px;color:var(--ac);min-width:32px;" id="leftRatioLabel">50%</span>
+    <div class="bottom-main-row">
+      <div class="search-input-wrap">
+        <div class="search-input-bar" id="searchBarPage">
+          <input type="text" class="sinput-big" id="kw-input-page" placeholder="关键词 空格 关键词，或拍照/选图/识别左侧..." autocomplete="off" autocorrect="off" spellcheck="false" oninput="doSearchPage()" onfocus="onSearchPageFocus()">
+          <button class="sbtn-icon" id="clearSearchBtnPage" onclick="clearSearchPage()" style="display:none;">✕</button>
+          <button class="sbtn-icon primary" onclick="doSearchPage()">🔍</button>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span style="font-size:10px;color:var(--tx2);">左侧比例</span>
+          <input type="range" id="leftRatio" min="30" max="70" value="50" style="flex:1;" oninput="updateLeftRatioLabel()">
+          <span style="font-size:10px;color:var(--ac);min-width:32px;" id="leftRatioLabel">50%</span>
+        </div>
+      </div>
+      <div class="ocr-side-grid">
+        <button class="ocr-btn-side" onclick="document.getElementById('camInput').click()"><b>📷</b>拍照</button>
+        <button class="ocr-btn-side" onclick="document.getElementById('galleryInput').click()"><b>🖼️</b>选图</button>
+        <button class="ocr-btn-side" onclick="tryPaste()"><b>📋</b>粘贴</button>
+        <button class="ocr-btn-side" onclick="captureLeft()" style="border-color:rgba(88,166,255,.35);background:rgba(88,166,255,.10);"><b>🖥️</b>左侧</button>
+      </div>
     </div>
-    <div class="search-input-bar" id="searchBarPage">
-      <input type="text" class="sinput-big" id="kw-input-page" placeholder="关键词 空格 关键词，或拍照/选图/识别左侧..." autocomplete="off" autocorrect="off" spellcheck="false" oninput="doSearchPage()" onfocus="onSearchPageFocus()">
-      <button class="sbtn-icon" id="clearSearchBtnPage" onclick="clearSearchPage()" style="display:none;">✕</button>
-      <button class="sbtn-icon primary" onclick="doSearchPage()">🔍</button>
-    </div>
-    <div style="font-size:10px;color:var(--tx2);text-align:center;">底部向上 · 左侧自动裁切 · 无插件 · 拍照离线识别</div>
+    <div style="font-size:10px;color:var(--tx2);text-align:center;">底部固定 · 内容随便拉不动搜索框 · 侧边识别 · 无插件</div>
   </div>
 </div>
 
@@ -503,37 +520,78 @@ function showDetail(id){
 function closeModal(e){if(e.target===document.getElementById('modal'))document.getElementById('modal').classList.remove('on');}
 function closeModalBtn(){document.getElementById('modal').classList.remove('on');}
 
-// OCR 相关
+// OCR 相关 - 带停止按钮版
+var currentOCRWorker=null;
+var ocrAbort=false;
+function showOCRStop(show, txt){
+  var row=document.getElementById('ocrStopRow');
+  var prog=document.getElementById('ocrProgressText');
+  if(row){
+    if(show){ row.classList.add('on'); row.style.display='flex'; }else{ row.classList.remove('on'); row.style.display='none'; }
+  }
+  if(prog && txt) prog.textContent=txt;
+}
 async function doOCR(imageSource){
   var inner=document.getElementById('search-inner');
   var outer=document.getElementById('search-results-page');
+  ocrAbort=false;
   try{
-    if(typeof Tesseract==='undefined'){ inner.innerHTML='<div class="sr-empty">识别库未加载，请检查网络<br>首次需10MB左右</div>'; return; }
+    if(typeof Tesseract==='undefined'){ inner.innerHTML='<div class="sr-empty">识别库未加载，请检查网络<br>首次需10MB左右</div>'; showOCRStop(false); return; }
     inner.innerHTML='<div class="sr-empty">📷 识别中... 正在加载字库<br>首次约10MB，之后离线秒开</div>';
+    showOCRStop(true, '加载字库... 0%');
     if(outer) outer.scrollTop=outer.scrollHeight;
-    var result=await Tesseract.recognize(imageSource, 'chi_sim+eng', {
+    // 用 createWorker 以便能停止
+    var worker=await Tesseract.createWorker('chi_sim+eng', 1, {
       logger: function(m){
+        if(ocrAbort) return;
+        var pct=Math.round((m.progress||0)*100);
         if(m.status==='recognizing text'){
-          inner.innerHTML='<div class="sr-empty">📷 识别中... '+Math.round(m.progress*100)+'%<br>'+m.status+'</div>';
+          inner.innerHTML='<div class="sr-empty">📷 识别中... '+pct+'%<br>'+m.status+'<br><span style="font-size:10px;">太慢点右上停止</span></div>';
+          showOCRStop(true, '识别中... '+pct+'%');
         }else{
-          inner.innerHTML='<div class="sr-empty">📷 '+m.status+'...<br>首次稍慢，离线后秒开</div>';
+          inner.innerHTML='<div class="sr-empty">📷 '+m.status+'... '+pct+'%<br>首次稍慢，离线后秒开</div>';
+          showOCRStop(true, m.status+' '+pct+'%');
         }
         if(outer) outer.scrollTop=outer.scrollHeight;
       }
     });
-    var text=(result.data.text||'').replace(/\s+/g,' ').trim();
-    // 清理：只保留中文英文数字常见符号，去掉多余换行
+    currentOCRWorker=worker;
+    if(ocrAbort){ try{ await worker.terminate(); }catch(e){} currentOCRWorker=null; showOCRStop(false); return; }
+    var ret=await worker.recognize(imageSource);
+    if(ocrAbort){ try{ await worker.terminate(); }catch(e){} currentOCRWorker=null; showOCRStop(false); return; }
+    var text=(ret.data.text||'').replace(/\s+/g,' ').trim();
+    try{ await worker.terminate(); }catch(e){}
+    currentOCRWorker=null;
+    showOCRStop(false);
     text=text.replace(/[^\u4e00-\u9fa5a-zA-Z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
-    if(!text){ inner.innerHTML='<div class="sr-empty">未识别到文字，试试更清晰的截图</div>'; return; }
+    if(!text){ inner.innerHTML='<div class="sr-empty">未识别到文字，试试更清晰的截图<br><button class="btn-mini" onclick="clearSearchPage()">返回文字搜</button></div>'; return; }
     var inp=document.getElementById('kw-input-page');
     inp.value=text.slice(0,120);
-    // 自动搜索
     lastKw='';
     doSearchPage();
   }catch(err){
+    if(ocrAbort){
+      inner.innerHTML='<div class="sr-empty">已停止识别<br>切回文字搜索：关键词 空格 关键词</div>';
+      showOCRStop(false);
+      return;
+    }
     var inner=document.getElementById('search-inner');
-    inner.innerHTML='<div class="sr-empty">识别失败：'+escHtml(err.message||String(err))+'<br>试试选更清晰的图</div>';
+    inner.innerHTML='<div class="sr-empty">识别失败：'+escHtml(err.message||String(err))+'<br>试试选更清晰的图<br><button class="btn-mini" onclick="clearSearchPage()">返回</button></div>';
+    showOCRStop(false);
   }
+}
+function stopOCR(){
+  ocrAbort=true;
+  showOCRStop(true, '正在停止...');
+  if(currentOCRWorker){
+    try{ currentOCRWorker.terminate(); }catch(e){}
+    currentOCRWorker=null;
+  }
+  setTimeout(function(){
+    var inner=document.getElementById('search-inner');
+    if(inner) inner.innerHTML='<div class="sr-empty">已停止识别<br>太慢的话直接打字搜更快<br>例：喀什 机场</div>';
+    showOCRStop(false);
+  }, 300);
 }
 function setupFileInputs(){
   var cam=document.getElementById('camInput');
@@ -570,26 +628,72 @@ async function captureLeft(){
   var outer=document.getElementById('search-results-page');
   var ratioEl=document.getElementById('leftRatio');
   var ratio=ratioEl? parseInt(ratioEl.value)/100 : 0.5;
+  // 检测是不是从主屏幕PWA打开的，PWA里不支持截屏
+  var isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+  if(isStandalone){
+    inner.innerHTML='<div class="sr-empty">🖥️ 你是从主屏幕图标打开的（PWA模式），iPad在这个模式下不允许截屏<br>请用 Safari 浏览器直接打开网址，不要从主屏幕图标进<br>然后再试 识别左侧<br>或直接用 📷 拍照更稳</div>';
+    if(outer) outer.scrollTop=outer.scrollHeight;
+    return;
+  }
   if(!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia){
-    inner.innerHTML='<div class="sr-empty">🖥️ 当前浏览器不支持一键识别左侧<br>公司iPad可能禁用了屏幕录制<br>请用 📷 拍照对着左边App拍，最稳<br>或用 🖼️ 选图 / 📋 粘贴</div>';
+    inner.innerHTML='<div class="sr-empty">🖥️ 当前浏览器不支持一键识别左侧<br>iPad请确认：1. 用 Safari 打开（不是Chrome）<br>2. 系统是 iPadOS 16.4 以上<br>3. 没开屏幕时间限制<br>先用 📷 拍照对着左边App拍，最稳</div>';
     if(outer) outer.scrollTop=outer.scrollHeight;
     return;
   }
   try{
-    inner.innerHTML='<div class="sr-empty">🖥️ 请选择要分享的屏幕<br>选“整个屏幕”就能抓到分屏的左边<br>已设置自动裁左 '+Math.round(ratio*100)+'% 识别</div>';
+    inner.innerHTML='<div class="sr-empty">🖥️ 准备请求屏幕共享...<br>等下弹框选“整个屏幕”<br>已设置自动裁左 '+Math.round(ratio*100)+'%</div>';
     if(outer) outer.scrollTop=outer.scrollHeight;
-    var stream=await navigator.mediaDevices.getDisplayMedia({video:{displaySurface:'monitor'}});
+    var stream;
+    try{
+      // iPad上 displaySurface 参数会直接报错，先用最简参数
+      stream=await navigator.mediaDevices.getDisplayMedia({video:true, audio:false});
+    }catch(e1){
+      // 再试一次带 monitor 的参数
+      try{
+        stream=await navigator.mediaDevices.getDisplayMedia({video:{displaySurface:'monitor'}, audio:false});
+      }catch(e2){
+        throw e1; // 抛出第一个错误
+      }
+    }
+    inner.innerHTML='<div class="sr-empty">🖥️ 已获取屏幕，正在抓帧...<br>自动裁左 '+Math.round(ratio*100)+'%</div>';
+    if(outer) outer.scrollTop=outer.scrollHeight;
     var video=document.createElement('video');
-    video.srcObject=stream;
+    video.style.position='fixed';
+    video.style.left='-9999px';
+    video.style.width='1px';
+    video.style.height='1px';
+    video.playsInline=true;
     video.muted=true;
-    await video.play();
+    video.autoplay=true;
+    video.srcObject=stream;
+    document.body.appendChild(video);
+    // 等待视频有尺寸
+    await new Promise(function(res, rej){
+      var timeout=setTimeout(function(){ rej(new Error('视频加载超时，请重试')); }, 8000);
+      video.onloadedmetadata=function(){
+        clearTimeout(timeout);
+        res();
+      };
+      video.onerror=function(){ clearTimeout(timeout); rej(new Error('视频加载失败')); };
+    });
+    try{ await video.play(); }catch(e){}
+    // 再等一帧，确保有画面
+    await new Promise(function(r){ setTimeout(r, 300); });
+    var w=video.videoWidth||0;
+    var h=video.videoHeight||0;
+    if(w<10||h<10){
+      // 有些 iPad 返回0，用屏幕宽高估算
+      w=window.screen.width*2;
+      h=window.screen.height*2;
+    }
     var fullCanvas=document.createElement('canvas');
-    fullCanvas.width=video.videoWidth;
-    fullCanvas.height=video.videoHeight;
+    fullCanvas.width=w;
+    fullCanvas.height=h;
     var ctx=fullCanvas.getContext('2d');
-    ctx.drawImage(video,0,0);
-    stream.getTracks().forEach(function(t){t.stop();});
-    // 自动裁左侧
+    ctx.drawImage(video,0,0,w,h);
+    // 停止共享
+    try{ stream.getTracks().forEach(function(t){t.stop();}); }catch(e){}
+    try{ video.remove(); }catch(e){}
     var leftW=Math.floor(fullCanvas.width * ratio);
     var leftCanvas=document.createElement('canvas');
     leftCanvas.width=leftW;
@@ -600,7 +704,14 @@ async function captureLeft(){
     if(outer) outer.scrollTop=outer.scrollHeight;
     doOCR(leftCanvas);
   }catch(err){
-    inner.innerHTML='<div class="sr-empty">识别左侧取消或失败：'+escHtml(err.message||String(err))+'<br>公司iPad可能禁用了此功能<br>请用 📷 拍照对着左边拍，更稳</div>';
+    var msg=(err && err.message) ? err.message : String(err);
+    var extra='';
+    if(msg.indexOf('NotAllowedError')!==-1 || msg.indexOf('Permission denied')!==-1){
+      extra='<br>你点了取消，或系统拒绝了<br>请检查：设置→屏幕使用时间→内容和隐私限制→屏幕录制是否允许';
+    }else if(msg.indexOf('NotFoundError')!==-1){
+      extra='<br>未找到可共享的屏幕，试试把分屏调成50/50再点';
+    }
+    inner.innerHTML='<div class="sr-empty">识别左侧失败：'+escHtml(msg)+extra+'<br><br>解决办法：<br>1. 必须用 Safari 打开，不是Chrome<br>2. 不能从主屏幕图标进，要从Safari地址栏进<br>3. iPadOS要16.4以上<br>4. 先用 📷 拍照，更稳，不挑设置</div>';
     if(outer) outer.scrollTop=outer.scrollHeight;
   }
 }
