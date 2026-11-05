@@ -1,9 +1,9 @@
 {
-  "name": "A330精准题库",
-  "short_name": "A330精准",
+  "name": "A330 题库5389题",
+  "short_name": "A330题库",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0d1117",
-  "theme_color": "#0d1117",
+  "background_color": "#0b1220",
+  "theme_color": "#0b1220",
   "icons": []
 }
